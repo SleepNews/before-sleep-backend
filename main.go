@@ -14,7 +14,10 @@ func setupRouter(server *api.Server) *gin.Engine {
 	// gin.DisableConsoleColor()
 	r := gin.Default()
 
-	r.GET("/comment/:id", server.CommentDetailHandler)
+	r.GET("/topics/:topic_id/comments", server.GetTopicComments)
+	r.POST("/topics/:topic_id/comments", server.PostComment)
+	r.Match([]string{"POST", "DELETE"}, "/comments/:comment_id/like", server.LikeComment)
+	r.Match([]string{"POST", "DELETE"}, "/comments/:comment_id/dislike", server.DislikeComment)
 
 	// Ping test
 	r.GET("/ping", func(c *gin.Context) {
@@ -32,7 +35,7 @@ func setupRouter(server *api.Server) *gin.Engine {
 func setUpDB() *gorm.DB {
 	dsn := "root:root@tcp(127.0.0.1:3306)/before_sleep?charset=utf8mb4&parseTime=True&loc=Local"
 	db, _ := gorm.Open(mysql.Open(dsn), &gorm.Config{})
-	db.AutoMigrate(&repo.Comment{}, &repo.Topic{}, &repo.User{})
+	db.AutoMigrate(&repo.User{}, &repo.Topic{}, &repo.Comment{}, &repo.CommentLike{})
 	sqlDB, _ := db.DB()
 	sqlDB.SetMaxIdleConns(10)
 	sqlDB.SetMaxOpenConns(100)
