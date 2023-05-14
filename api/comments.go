@@ -8,23 +8,23 @@ import (
 	"strconv"
 )
 
-func (s *Server) GetTopicComments(c *gin.Context) {
+func (server *Server) GetTopicComments(c *gin.Context) {
 	idStr := c.Params.ByName("topic_id")
 	// parse id to uint
 	id, _ := strconv.Atoi(idStr)
 	var comments []repo.Comment
-	s.DB.Where("topic_id = ?", id).Find(&comments)
+	server.DB.Where("topic_id = ?", id).Find(&comments)
 	c.JSON(200, comments)
 }
 
-func (s *Server) PostComment(c *gin.Context) {
+func (server *Server) PostComment(c *gin.Context) {
 	var comment repo.Comment
 	c.BindJSON(&comment)
 	idStr := c.Params.ByName("topic_id")
 	// parse id to uint
 	id, _ := strconv.Atoi(idStr)
 	comment.TopicID = uint(id)
-	result := s.DB.Select("Content", "UserID", "TopicID", "ParentID").Create(&comment)
+	result := server.DB.Select("Content", "UserID", "TopicID", "ParentID").Create(&comment)
 	if result.Error != nil {
 		c.JSON(500, result.Error)
 		return
@@ -32,15 +32,15 @@ func (s *Server) PostComment(c *gin.Context) {
 	c.JSON(200, comment)
 }
 
-func (s *Server) LikeComment(c *gin.Context) {
-	s.LikeOrDislikeComment(c, true)
+func (server *Server) LikeComment(c *gin.Context) {
+	server.LikeOrDislikeComment(c, true)
 }
 
-func (s *Server) DislikeComment(c *gin.Context) {
-	s.LikeOrDislikeComment(c, false)
+func (server *Server) DislikeComment(c *gin.Context) {
+	server.LikeOrDislikeComment(c, false)
 }
 
-func (s *Server) LikeOrDislikeComment(c *gin.Context, like bool) {
+func (server *Server) LikeOrDislikeComment(c *gin.Context, like bool) {
 	idStr := c.Query("user_id")
 	// parse id to uint
 	userID, _ := strconv.Atoi(idStr)
@@ -49,7 +49,7 @@ func (s *Server) LikeOrDislikeComment(c *gin.Context, like bool) {
 	commentID, _ := strconv.Atoi(idStr)
 
 	var commentLike repo.CommentLike
-	result := s.DB.Where("user_id = ? AND comment_id = ?", userID, commentID).First(&commentLike)
+	result := server.DB.Where("user_id = ? AND comment_id = ?", userID, commentID).First(&commentLike)
 
 	updateValues := map[string]interface{}{}
 
@@ -59,7 +59,7 @@ func (s *Server) LikeOrDislikeComment(c *gin.Context, like bool) {
 			c.JSON(200, "already canceled "+getOperation(like))
 			return
 		}
-		result = s.DB.Delete(&commentLike)
+		result = server.DB.Delete(&commentLike)
 		if result.Error != nil {
 			fmt.Println("SQL: ", result.Statement.SQL.String())
 			c.JSON(500, result.Error)
@@ -69,7 +69,7 @@ func (s *Server) LikeOrDislikeComment(c *gin.Context, like bool) {
 	} else {
 		if result.RowsAffected == 0 {
 			commentLike = repo.CommentLike{UserID: uint(userID), CommentID: uint(commentID), Like: like}
-			result = s.DB.Create(&commentLike)
+			result = server.DB.Create(&commentLike)
 			if result.Error != nil {
 				fmt.Println("SQL: ", result.Statement.SQL.String())
 				c.JSON(500, result.Error)
@@ -83,13 +83,13 @@ func (s *Server) LikeOrDislikeComment(c *gin.Context, like bool) {
 				return
 			}
 			commentLike.Like = like
-			s.DB.Save(&commentLike)
+			server.DB.Save(&commentLike)
 			updateValues[getOperation(like)] = gorm.Expr(getOperation(like)+" + ?", 1)
 			updateValues[getOperation(!like)] = gorm.Expr(getOperation(!like)+" - ?", 1)
 		}
 	}
 
-	result = s.DB.Model(&repo.Comment{}).Where("id = ?", commentID).Updates(updateValues)
+	result = server.DB.Model(&repo.Comment{}).Where("id = ?", commentID).Updates(updateValues)
 	if result.Error != nil {
 		fmt.Println("SQL: ", result.Statement.SQL.String())
 		c.JSON(500, result.Error)
