@@ -1,4 +1,4 @@
-module github.com/finalfree/before-sleep-backend
+module github.com/finalfree/sleeping-news
 
 go 1.19
 
