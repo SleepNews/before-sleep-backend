@@ -56,13 +56,13 @@ func (server *Server) LikeOrDislikeComment(c *gin.Context, like bool) {
 	if c.Request.Method == "DELETE" {
 		if result.RowsAffected == 0 || like != commentLike.Like {
 			fmt.Println("SQL: ", result.Statement.SQL.String())
-			c.JSON(200, "already canceled "+getOperation(like))
+			c.String(200, "already canceled "+getOperation(like))
 			return
 		}
 		result = server.DB.Delete(&commentLike)
 		if result.Error != nil {
 			fmt.Println("SQL: ", result.Statement.SQL.String())
-			c.JSON(500, result.Error)
+			c.String(500, result.Error.Error())
 			return
 		}
 		updateValues[getOperation(like)] = gorm.Expr(getOperation(like)+" - ?", 1)
@@ -72,14 +72,14 @@ func (server *Server) LikeOrDislikeComment(c *gin.Context, like bool) {
 			result = server.DB.Create(&commentLike)
 			if result.Error != nil {
 				fmt.Println("SQL: ", result.Statement.SQL.String())
-				c.JSON(500, result.Error)
+				c.String(500, result.Error.Error())
 				return
 			}
 			updateValues[getOperation(like)] = gorm.Expr(getOperation(like)+" + ?", 1)
 		} else {
 			if like == commentLike.Like {
 				fmt.Println("SQL: ", result.Statement.SQL.String())
-				c.JSON(200, "already "+getOperation(like))
+				c.String(200, "already "+getOperation(like))
 				return
 			}
 			commentLike.Like = like
@@ -92,7 +92,7 @@ func (server *Server) LikeOrDislikeComment(c *gin.Context, like bool) {
 	result = server.DB.Model(&repo.Comment{}).Where("id = ?", commentID).Updates(updateValues)
 	if result.Error != nil {
 		fmt.Println("SQL: ", result.Statement.SQL.String())
-		c.JSON(500, result.Error)
+		c.String(500, result.Error.Error())
 		return
 	}
 	c.String(200, getOperation(like)+" success")
