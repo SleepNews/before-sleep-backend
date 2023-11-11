@@ -2,7 +2,7 @@ package api
 
 import (
 	"fmt"
-	"github.com/finalfree/sleeping-news/repo"
+	"github.com/SleepingNews/sleeping-news-backend/repo"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"strconv"
