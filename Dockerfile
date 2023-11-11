@@ -7,6 +7,9 @@ WORKDIR /app
 # 将项目文件复制到容器中
 COPY . .
 
+# 设置go proxy
+RUN go env -w GOPROXY=https://goproxy.cn,direct
+
 # 构建 Go 项目
 RUN go build -o main .
 
