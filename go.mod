@@ -1,4 +1,4 @@
-module github.com/finalfree/sleeping-news
+module github.com/SleepingNews/sleeping-news-backend
 
 go 1.21
 

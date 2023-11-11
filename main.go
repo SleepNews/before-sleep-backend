@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/finalfree/sleeping-news/api"
-	"github.com/finalfree/sleeping-news/repo"
+	"github.com/SleepingNews/sleeping-news-backend/api"
+	"github.com/SleepingNews/sleeping-news-backend/repo"
 	"github.com/jessevdk/go-flags"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -15,7 +15,7 @@ type Options struct {
 }
 
 func setUpDB(options *Options) *gorm.DB {
-	dsn := "root:root@tcp(127.0.0.1:3306)/sleeping_news?charset=utf8mb4&parseTime=True&loc=Local"
+	dsn := "root:root@tcp(database:3306)/sleeping_news?charset=utf8mb4&parseTime=True&loc=Local"
 	db, _ := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	db.AutoMigrate(&repo.User{}, &repo.Topic{}, &repo.Comment{}, &repo.CommentLike{})
 	sqlDB, _ := db.DB()
