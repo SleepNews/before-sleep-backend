@@ -18,5 +18,13 @@ services:
     volumes:
       - db-sleeping-news:/var/lib/mysql
 
+  phpmyadmin:
+    image: phpmyadmin
+    restart: always
+    ports:
+      - 8081:80
+    environment:
+      - PMA_ARBITRARY=1
+
 volumes:
   db-sleeping-news:
